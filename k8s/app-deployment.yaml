@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-app
+  namespace: ecommerce
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: ecommerce-app
+
+  template:
+    metadata:
+      labels:
+        app: ecommerce-app
+
+    spec:
+      containers:
+        - name: ecommerce-app
+          image: ecommerce-app:latest
+          imagePullPolicy: Never
+
+          ports:
+            - containerPort: 8082
+
+          env:
+            - name: SERVER_PORT
+              value: "8082"
+
+            - name: DB_DRIVER
+              value: "com.mysql.cj.jdbc.Driver"
+
+            - name: DB_URL
+              value: "jdbc:mysql://mysql:3306/ecommjava?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+
+            - name: DB_USERNAME
+              value: "root"
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+
+            - name: HIBERNATE_DIALECT
+              value: "org.hibernate.dialect.MySQL5Dialect"
+
+            - name: HIBERNATE_SHOW_SQL
+              value: "true"
+
+            - name: HIBERNATE_HBM2DDL_AUTO
+              value: "update"
+
+            - name: ENTITYMANAGER_PACKAGES_TO_SCAN
+              value: "com"
